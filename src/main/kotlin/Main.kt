@@ -1,20 +1,39 @@
 
 fun main(args: Array<String>) {
-    val game=Branch("U are in front of the castle what will u do"){
-        WalkBack() leadsTo TerminalBranch("You walked back and stopped with it ")
-        WalkInside() leadsTo Branch("""In front of u is the main hall, will u open the main door
-It looks kinda sus. Or will u go to the left doorway"""){
-            OpenAction() leadsTo TerminalBranch("a guard pops out and kills u")
-            WalkBack() leadsTo TerminalBranch(" you ended ur story at the first room u do be kinda scared tho.")
+    val game=Branch("You are standing in front of a large castle, what will you do?"){
+        WalkBack() leadsTo TerminalBranch("You walked back and went home, Game Over.")
+        WalkInside() leadsTo Branch("""In front of you is the main hall, will you open the main door? It looks spooky. Or will you go to the left doorway""".trimMargin()){
+            OpenAction() leadsTo TerminalBranch("A guard sees you and cuts you down, Game Over.")
+            WalkBack() leadsTo TerminalBranch(" You left the castle and went home. Game Over.")
             val startOfLeftRoomBranch:RefBranch=RefBranch(Branch())
-            val startOfLeftRoom=Branch("U are in a big room with 4 doors"){
-                WalkInside() leadsTo Branch("U are now in the main hall and u can't see anything"){
+            val startOfLeftRoom=Branch("You're in a room with four doors."){
+                WalkInside() leadsTo Branch("You are now in the main hall, it's to dark see anything."){
                     WalkBack() leadsTo startOfLeftRoomBranch
-                    WalkRight() leadsTo Branch("U are now in fully in the dark and u lost the door where u came in from")
+                    WalkRight() leadsTo TerminalBranch("You can only see darkness and lost the door you came in from and died by a guard. Game Over")
+                    WalkForward() leadsTo Branch("You walked into the second hall, there are three more doors here."){
+                        WalkForward() leadsTo TerminalBranch("You walked into the boss room unprepared and died, Game Over.")
+                        WalkRight() leadsTo TerminalBranch("You walked into a guard and he cut you down, Game Over.")
+                        WalkLeft() leadsTo Branch("You walked into the armory, there might be something you want here."){
+                            PickupAction() leadsTo Branch("You see a sword and shield and picked them up,this will help keep you safe."){
+                                WalkBack() leadsTo Branch("You walked into the second hall, there are two more doors here."){
+                                    WalkRight() leadsTo Branch("There is a guard in the room, You overpowered him and walked back into the hall."){
+                                        WalkForward() leadsTo Branch("You walked into the boss room, Will you fight or flee?"){
+                                            FightAction() leadsTo TerminalBranch("You fought the boss and came out victorious, Congratulations!")
+                                            FleeAction() leadsTo TerminalBranch("You got scared and ran away, Game Over.")
+                                        }
+                                    }
+                                    WalkForward() leadsTo Branch("You walked into the boss room, Will you fight or flee?"){
+                                        FightAction() leadsTo TerminalBranch("You fought the boss and came out victorious, Congratulations!")
+                                        FleeAction() leadsTo TerminalBranch("You got scared and ran away, Game Over.")
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
                 WalkLeft() leadsTo TerminalBranch("U walked back into the room that was in the main room u died.")
-                WalkRight() leadsTo Branch("U walked into the weapon room, there might be something in here for u"){
-                    OpenAction() leadsTo TerminalBranch("U open the weapon box, bad choose it was poisoned")
+                WalkRight() leadsTo Branch("You stumbled into the weapon room, look around you might find something."){
+                    OpenAction() leadsTo TerminalBranch("You picked up a sword, unfortunately it was poisoned..")
                     WalkBack() leadsTo startOfLeftRoomBranch
                 }
             }
@@ -38,6 +57,9 @@ abstract class SimpleAction(override val label: String):Action{
 class OpenAction:SimpleAction("OPEN")
 class CloseAction:SimpleAction("CLOSE")
 class HitAction:SimpleAction("HIT")
+class PickupAction:SimpleAction("PICKUP")
+class FightAction:SimpleAction("FIGHT")
+class FleeAction:SimpleAction("FLEE")
 
 abstract class WalkAction(val direction:String):Action{
     override val label: String = "WALK $direction"
@@ -51,6 +73,7 @@ class WalkInside:WalkAction("INSIDE")
 class WalkRight:WalkAction("RIGHT")
 class WalkBack:WalkAction("BACKWARDS")
 class WalkLeft:WalkAction("LEFT")
+class WalkForward:WalkAction("FORWARD")
 
 interface IBranch {
     val description: String
